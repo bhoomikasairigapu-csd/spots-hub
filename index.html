@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SportsCentral - Live Scores & News</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #333;
+            border: 2px solid #667eea;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Main Content */
+        main {
+            padding: 2rem 0;
+        }
+
+        .page {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 1rem 0;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1, h2 {
+            margin-bottom: 1.5rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Live Scores */
+        .scores-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .match-card {
+            background: linear-gradient(135deg, #f8f9ff, #e8f0ff);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .match-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .live-indicator {
+            background: #ff4757;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .teams {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .team {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .team-score {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        /* News Section */
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .news-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .news-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .news-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .news-content {
+            padding: 1.5rem;
+        }
+
+        .news-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .news-excerpt {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .news-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            color: #888;
+            font-size: 0.8rem;
+        }
+
+        /* Statistics */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Forms */
+        .form-container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        /* Updates Feed */
+        .updates-feed {
+            max-height: 500px;
+            overflow-y: auto;
+            background: #f8f9ff;
+            border-radius: 15px;
+            padding: 1rem;
+        }
+
+        .update-item {
+            background: white;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .update-time {
+            color: #888;
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .update-text {
+            color: #333;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .scores-grid,
+            .news-grid,
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .teams {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #userInfo {
+            color: #667eea;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">SportsCentral</div>
+            <ul class="nav-links">
+                <li><a href="#" onclick="showPage('home')" class="active">Home</a></li>
+                <li><a href="#" onclick="showPage('scores')">Live Scores</a></li>
+                <li><a href="#" onclick="showPage('news')">News</a></li>
+                <li><a href="#" onclick="showPage('stats')">Statistics</a></li>
+                <li><a href="#" onclick="showPage('contact')">Contact</a></li>
+            </ul>
+            <div class="auth-buttons">
+                <div id="userInfo" class="hidden"></div>
+                <a href="#" id="loginBtn" onclick="showPage('login')" class="btn btn-secondary">Login</a>
+                <a href="#" id="logoutBtn" onclick="logout()" class="btn btn-primary hidden">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <!-- Home Page -->
+        <div id="home" class="page active">
+            <h1>Welcome to SportsCentral</h1>
+            <p>Your ultimate destination for live sports scores, latest news, and comprehensive statistics.</p>
+            
+            <div class="scores-grid">
+                <div class="match-card">
+                    <div class="match-header">
+                        <span>Football</span>
+                        <span class="live-indicator">LIVE</span>
+                    </div>
+                    <div class="teams">
+                        <div class="team">
+                            <span>Manchester United</span>
+                            <span class="team-score">2</span>
+                        </div>
+                        <div>-</div>
+                        <div class="team">
+                            <span class="team-score">1</span>
+                            <span>Liverpool</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="match-card">
+                    <div class="match-header">
+                        <span>Basketball</span>
+                        <span class="live-indicator">LIVE</span>
+                    </div>
+                    <div class="teams">
+                        <div class="team">
+                            <span>Lakers</span>
+                            <span class="team-score">98</span>
+                        </div>
+                        <div>-</div>
+                        <div class="team">
+                            <span class="team-score">102</span>
+                            <span>Warriors</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h2>Random Sports Updates</h2>
+            <div class="updates-feed" id="updatesfeed">
+                <!-- Updates will be populated here -->
+            </div>
+        </div>
+
+        <!-- Live Scores Page -->
+        <div id="scores" class="page">
+            <h1>Live Scores</h1>
+            <div class="scores-grid" id="scoresGrid">
+                <!-- Scores will be populated here -->
+            </div>
+        </div>
+
+        <!-- News Page -->
+        <div id="news" class="page">
+            <h1>Latest Sports News</h1>
+            <div class="news-grid" id="newsGrid">
+                <!-- News will be populated here -->
+            </div>
+        </div>
+
+        <!-- Statistics Page -->
+        <div id="stats" class="page">
+            <h1>Sports Statistics</h1>
+            <div class="stats-container" id="statsContainer">
+                <!-- Stats will be populated here -->
+            </div>
+        </div>
+
+        <!-- Contact Page -->
+        <div id="contact" class="page">
+            <h1>Contact Us</h1>
+            <div class="form-container">
+                <form id="contactForm">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="subject">Subject</label>
+                        <input type="text" id="subject" name="subject" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send Message</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Login Page -->
+        <div id="login" class="page">
+            <h1>Login</h1>
+            <div class="form-container">
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </form>
+                <p style="text-align: center; margin-top: 1rem;">Demo: Use username "demo" and password "demo123"</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Mock data
+        const sportsData = {
+            scores: [
+                { sport: 'Football', team1: 'Manchester United', team2: 'Liverpool', score1: 2, score2: 1, status: 'LIVE' },
+                { sport: 'Basketball', team1: 'Lakers', team2: 'Warriors', score1: 98, score2: 102, status: 'LIVE' },
+                { sport: 'Tennis', team1: 'Djokovic', team2: 'Nadal', score1: 6, score2: 4, status: 'LIVE' },
+                { sport: 'Cricket', team1: 'India', team2: 'Australia', score1: 245, score2: 189, status: 'FINISHED' },
+                { sport: 'Hockey', team1: 'Rangers', team2: 'Bruins', score1: 3, score2: 2, status: 'LIVE' },
+                { sport: 'Baseball', team1: 'Yankees', team2: 'Red Sox', score1: 7, score2: 4, status: 'FINISHED' }
+            ],
+            news: [
+                { title: 'Major Transfer News Shakes Football World', excerpt: 'A surprise transfer has sent shockwaves through the football community...', time: '2 hours ago' },
+                { title: 'Championship Final Set for Next Week', excerpt: 'Two powerhouse teams prepare for the ultimate showdown...', time: '4 hours ago' },
+                { title: 'Record Breaking Performance in Olympics', excerpt: 'Athlete sets new world record in stunning display...', time: '6 hours ago' },
+                { title: 'New Stadium Opens to Fanfare', excerpt: 'State-of-the-art facility welcomes first match...', time: '8 hours ago' },
+                { title: 'Injury Update on Star Player', excerpt: 'Medical team provides optimistic outlook...', time: '10 hours ago' },
+                { title: 'Youth Academy Produces Next Generation', excerpt: 'Young talents show promise for future...', time: '12 hours ago' }
+            ],
+            stats: [
+                { label: 'Total Games Today', value: '156' },
+                { label: 'Live Matches', value: '23' },
+                { label: 'Active Users', value: '45.2K' },
+                { label: 'News Articles', value: '1,247' }
+            ],
+            updates: [
+                'GOAL! Manchester United scores the opening goal against Liverpool!',
+                'Lakers trail by 4 points in the final quarter against Warriors',
+                'Djokovic wins the first set 6-4 against Nadal in the championship final',
+                'Cricket match: India posts a massive total of 245 runs',
+                'Rangers take the lead with a power play goal',
+                'Yankees extend their lead with a home run in the 7th inning',
+                'Breaking: Star player cleared to play in upcoming championship',
+                'Weather delay affects outdoor matches in the eastern division',
+                'New signing makes debut appearance in today\'s fixture',
+                'Referee controversy sparks debate in social media'
+            ]
+        };
+
+        let currentUser = null;
+
+        // Page navigation
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+            
+            // Update navigation
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Load page-specific content
+            switch(pageId) {
+                case 'scores':
+                    loadScores();
+                    break;
+                case 'news':
+                    loadNews();
+                    break;
+                case 'stats':
+                    loadStats();
+                    break;
+            }
+        }
+
+        // Load scores
+        function loadScores() {
+            const scoresGrid = document.getElementById('scoresGrid');
+            scoresGrid.innerHTML = sportsData.scores.map(match => `
+                <div class="match-card">
+                    <div class="match-header">
+                        <span>${match.sport}</span>
+                        <span class="live-indicator ${match.status === 'LIVE' ? '' : 'hidden'}">${match.status}</span>
+                    </div>
+                    <div class="teams">
+                        <div class="team">
+                            <span>${match.team1}</span>
+                            <span class="team-score">${match.score1}</span>
+                        </div>
+                        <div>-</div>
+                        <div class="team">
+                            <span class="team-score">${match.score2}</span>
+                            <span>${match.team2}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load news
+        function loadNews() {
+            const newsGrid = document.getElementById('newsGrid');
+            newsGrid.innerHTML = sportsData.news.map(article => `
+                <div class="news-card">
+                    <div class="news-image">📰 Sports News</div>
+                    <div class="news-content">
+                        <div class="news-title">${article.title}</div>
+                        <div class="news-excerpt">${article.excerpt}</div>
+                        <div class="news-meta">
+                            <span>SportsCentral</span>
+                            <span>${article.time}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load statistics
+        function loadStats() {
+            const statsContainer = document.getElementById('statsContainer');
+            statsContainer.innerHTML = sportsData.stats.map(stat => `
+                <div class="stat-card">
+                    <div class="stat-number">${stat.value}</div>
+                    <div class="stat-label">${stat.label}</div>
+                </div>
+            `).join('');
+        }
+
+        // Login functionality
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (username === 'demo' && password === 'demo123') {
+                currentUser = username;
+                document.getElementById('userInfo').textContent = `Welcome, ${username}!`;
+                document.getElementById('userInfo').classList.remove('hidden');
+                document.getElementById('loginBtn').classList.add('hidden');
+                document.getElementById('logoutBtn').classList.remove('hidden');
+                alert('Login successful!');
+                showPage('home');
+            } else {
+                alert('Invalid credentials! Use demo/demo123');
+            }
+        });
+
+        // Logout functionality
+        function logout() {
+            currentUser = null;
+            document.getElementById('userInfo').classList.add('hidden');
+            document.getElementById('loginBtn').classList.remove('hidden');
+            document.getElementById('logoutBtn').classList.add('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            alert('Logged out successfully!');
+        }
+
+        // Contact form
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Thank you for your message! We will get back to you soon.');
+            this.reset();
+        });
+
+        // Random updates
+        function addRandomUpdate() {
+            const updatesContainer = document.getElementById('updatesdata');
+            const randomUpdate = sportsData.updates[Math.floor(Math.random() * sportsData.updates.length)];
+            const time = new Date().toLocaleTimeString();
+            
+            const updateElement = document.createElement('div');
+            updateElement.className = 'update-item';
+            updateElement.innerHTML = `
+                <div class="update-time">${time}</div>
+                <div class="update-text">${randomUpdate}</div>
+            `;
+            
+            updatesContainer.insertBefore(updateElement, updatesContainer.firstChild);
+            
+            // Keep only last 10 updates
+            while (updatesContainer.children.length > 10) {
+                updatesContainer.removeChild(updatesContainer.lastChild);
+            }
+        }
+
+        // Initialize random updates
+        function loadInitialUpdates() {
+            const updatesContainer = document.getElementById('updatesdata');
+            for (let i = 0; i < 5; i++) {
+                const randomUpdate = sportsData.updates[Math.floor(Math.random() * sportsData.updates.length)];
+                const time = new Date(Date.now() - (i * 15 * 60 * 1000)).toLocaleTimeString();
+                
+                const updateElement = document.createElement('div');
+                updateElement.className = 'update-item';
+                updateElement.innerHTML = `
+                    <div class="update-time">${time}</div>
+                    <div class="update-text">${randomUpdate}</div>
+                `;
+                updatesContainer.appendChild(updateElement);
+            }
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            loadInitialUpdates();
+            // Add new update every 30 seconds
+            setInterval(addRandomUpdate, 30000);
+        });
+
+        // Fix the updates container reference
+        function loadInitialUpdates() {
+            const updatesContainer = document.getElementById('updatesdata');
+            for (let i = 0; i < 5; i++) {
+                const randomUpdate = sportsData.updates[Math.floor(Math.random() * sportsData.updates.length)];
+                const time = new Date(Date.now() - (i * 15 * 60 * 1000)).toLocaleTimeString();
+                
+                const updateElement = document.createElement('div');
+                updateElement.className = 'update-item';
+                updateElement.innerHTML = `
+                    <div class="update-time">${time}</div>
+                    <div class="update-text">${randomUpdate}</div>
+                `;
+                updatesContainer.appendChild(updateElement);
+            }
+        }
+
+        // Initialize updates feed on home page
+        document.addEventListener('DOMContentLoaded', function() {
+            const updatesContainer = document.getElementById('updatesdata');
+            if (!updatesContainer) {
+                // Create updates container if it doesn't exist
+                const homeUpdates = document.querySelector('#home .updates-feed');
+                if (homeUpdates) {
+                    homeUpdates.id = 'updatesdata';
+                    loadInitialUpdates();
+                }
+            } else {
+                loadInitialUpdates();
+            }
+            
+            // Add new update every 30 seconds
+            setInterval(() => {
+                const container = document.getElementById('updatesdata') || document.querySelector('#home .updates-feed');
+                if (container) {
+                    const randomUpdate = sportsData.updates[Math.floor(Math.random() * sportsData.updates.length)];
+                    const time = new Date().toLocaleTimeString();
+                    
+                    const updateElement = document.createElement('div');
+                    updateElement.className = 'update-item';
+                    updateElement.innerHTML = `
+                        <div class="update-time">${time}</div>
+                        <div class="update-text">${randomUpdate}</div>
+                    `;
+                    
+                    container.insertBefore(updateElement, container.firstChild);
+                    
+                    // Keep only last 10 updates
+                    while (container.children.length > 10) {
+                        container.removeChild(container.lastChild);
+                    }
+                }
+            }, 30000);
+        });
+    </script>
+</body>
+</html>
